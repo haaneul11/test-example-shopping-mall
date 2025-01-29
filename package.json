@@ -14,6 +14,7 @@
     "@mui/lab": "5.0.0-alpha.124",
     "@mui/material": "^5.11.10",
     "@tanstack/react-query": "^4.29.23",
+    "@vitest/ui": "^1.6.0",
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",
     "classnames": "^2.3.2",
@@ -31,6 +32,7 @@
     "react-hot-toast": "^2.4.0",
     "react-router-dom": "^6.8.1",
     "swiper": "^9.1.0",
+    "vitest": "^1.6.0",
     "zustand": "^4.3.5"
   },
   "devDependencies": {
@@ -48,7 +50,6 @@
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
-    "@vitest/ui": "^0.33.0",
     "concurrently": "8.2.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
@@ -64,8 +65,7 @@
     "storybook": "^7.0.27",
     "storybook-addon-react-router-v6": "1.0.2",
     "vite": "^4.4.4",
-    "vite-plugin-eslint": "^1.8.1",
-    "vitest": "^0.33.0"
+    "vite-plugin-eslint": "^1.8.1"
   },
   "overrides": {
     "@testing-library/dom": "^9.0.1"

@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@vitest/ui": "^3.0.4"
+  },
+  "dependencies": {
+    "vitest": "^3.0.4"
+  }
+}

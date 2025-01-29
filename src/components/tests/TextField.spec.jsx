@@ -4,38 +4,119 @@ import React from 'react';
 import TextField from '@/components/TextField';
 import render from '@/utils/test/render';
 
-it('className prop으로 설정한 css class가 적용된다.', async () => {
-  // Arrange - 테스트를 위한 환경 만들기
-  // -> className을 지닌 컴포넌트 렌더링
-  // Act - 테스트할 동작 발생
-  // -> 렌더링에 대한 검증이기 때문에 이 단계는 생략
-  // -> 클릭이나 메서드 호출, prop 변경 등등에 대한 작업이 여기에 해당
-  //  Assert - 올바른 동작이 실행되었는지 검증
-  // -> 렌더링 후 DOM에 해당 class가 존재하는지 검증
+let someCondition = false;
 
-  // render API를 호출 -> 테스트 환경의 jsDOM에 리액트 컴포넌트가 렌더링된 DOM 구조가 반영
-  // jsDOM : Node.js에서 사용하기 위해 많은 웹 표준을 순수 자바스크립트로 구현
+// my-class란 class가 항상 적용된 컴포넌트를 렌더링
+// -> 이러한 렌더링 과정을 매 테스트마다 작성하기보다는 셋업으로 설정하면 훨씬 편리하게 테스트 가능
+beforeEach(async () => {
+  if (someCondition) {
+    await render(<TextField className={'my-class'} />);
+  } else {
+    // ...
+  }
+});
+// -> 테스트 컨텍스트마다 이와 같이 반복적인 컴포넌트 렌더링 패턴이 있는 경우
+// 이 경우에 셋업을 사용하거나 별도 함수로 만들어 호출하여 사용하면 깔끔하게 테스트 코드를 관리할 수 있다.
+
+it('className prop으로 설정한 css class가 적용된다.', async () => {
   await render(<TextField className={'my-class'} />);
 
-  // Assert 단계를 작성하기 위해서는 렌더링된 텍스트필드 요소를 조회해야한다. 테스트 대상이 되는 요소에 접근하기 위해서 React Testing Library에서 제공하는 다양한 API를 사용할 수 있다.
-  //- 텍스트 필드는 placeholder가 있는 요소이기 때문에 getByPlaceholderText라는 React 테스팅 라이브러리의 query를 사용하여 조회한다.
-  // - testing library에는 placeholder나 role, text 등의 값으로 요소를 조회하는 다양한 API가 있다.
-  // → 이런 방식으로 요소를 조호하면 내부 DOM 구조와는 무관하게 원하는 테스트 요소만 조회할 수 있어 견고한 테스트를 만들 수 있다.
-  //
-  // 내부 구현에 종속적이지 않은 테스트가 좋은 코드이다. → 테스팅 라이브러리는 세주 구현에 영향받지 않는 테스트를 추구하기 때문에 그에 맞는 형태의 API를 제공한다.
+  const textInput = screen.getByPlaceholderText('텍스트를 입력해 주세요.');
 
-  // 조회한 요소에 css 클래스가 적용되었는지 확인
-  // 대부분의 테스트 프레임워크에서는 expect란 함수를 사용하여 원하는 결과가 나오는지 검증할 수 있다.
+  expect(textInput).toHaveClass('my-class');
+});
 
-  // vitest의 expect 함수를 사용하여 기대 결과를 검증
-  // toHaveClass는 렌더링된 요소에 지정된 CSS 클래스가 올바르게 적용되었는지 검증하는 역할을 수행한다.
+describe('placeholder', () => {
+  beforeEach(() => {
+    console.log('placeholder - beforeEach');
+  });
 
-  // className이란 내부 props이나 state 값을 검증 (x)
-  // 렌더링되는 DOM 구조가 올바르게 변경되었는지 확인 (O) -> 최종적으로 사용자가 보는 결과는 DOM
-  // -> 그 이유는 내부 구현에 대한 종속성을 피해야 하기 때문이기도 하고 결국 최종적인 상태가 반영된 결과물은 사용자가 보는 DOM 이기 때문이다.
-  expect(screen.getByPlaceholderText('텍스트를 입력해 주세요.')).toHaveClass(
-    'my-class',
-  );
+  it('기본 placeholder "텍스트를 입력해 주세요."가 노축된다.', async () => {
+    await render(<TextField />);
 
-  // 단위 테스트 작성 끝!
+    const textInput = screen.getByPlaceholderText('텍스트를 입력해 주세요.');
+
+    expect(textInput).toBeInTheDocument();
+    // 단언(assertion) -> 테스트가 통과하기 위한 조건 -> 검증 실행
+  });
+
+  it('placeholder props에 따라 placeholder가 변경된다.', async () => {
+    //placeholder props가 올바르게 적용되는지 확인해야하기 때문에 렌더링 할 때 placeholder를 지정해준다.
+    await render(<TextField placeholder="상품명을 입력해 주세요." />);
+
+    const textInput = screen.getByPlaceholderText('상품명을 입력해 주세요.');
+
+    expect(textInput).toBeInTheDocument();
+    // 단언(assertion) -> 테스트가 통과하기 위한 조건 -> 검증 실행
+  });
+
+  it('텍스트를 입력하면 onChange prop으로 등록한 함수가 호출된다.', async () => {
+    // vi.fn()은 spy 함수를 만드는데 사용된다.
+    // spy 함수는 테스트 코드에서 특정 함수가 호출되었는지, 함수의 인자로 어떤것이 넘어왔는지, 어떤 값을 반환하는지 등 다양한 값들을 저장하고 있다.
+    // 보통 콜백 함수나 이벤트 핸들러가 올바르게 호출되었는지 검증하고 싶을 때 spy 함수를 활용한다.
+    // 예제 테스트의 경우 입력한 텍스트 즉 테그트 문자열을 인자로 받아 onChange 이벤트 핸들러가 호출되는지 확인해야 한다.
+    // spy 함수를 사용하면 이러한 함수 호출에 대한 검증을 쉽게 할 수 있다.
+    const spy = vi.fn();
+
+    //onChange={spy} 로 spy를 넘겨주면 onChangeHandler로 지정한 spy함수가 원하는 인자와 함께 호출되었는지 검증할 수 있다.
+    const { user } = await render(<TextField onChange={spy} />);
+
+    const textInput = screen.getByPlaceholderText('텍스트를 입력해 주세요.');
+
+    await user.type(textInput, 'test');
+
+    // 검증을 위해서는 매처가 필요하다.
+    // toHaveBeenCalledWith -> spy 함수가 내가 원하는 test란 문자열과 함께 올바르게 호출되었는지 단원할 수 있다.
+    expect(spy).toHaveBeenCalledWith('test');
+  });
+
+  it('엔터키를 입력하면 onEnter props으로 등록한 함수가 호출된다.', async () => {
+    // onEnterEventHandler가 올바르게 호출되는지 검증하는 것이기 때문에 spy 함수 필요
+    const spy = vi.fn();
+
+    const { user } = await render(<TextField onEnter={spy} />);
+
+    const textInput = screen.getByPlaceholderText('텍스트를 입력해 주세요.');
+
+    // Enter키를 입력하기 위해 type API에서는 중괄호를 열고 엔터 문자열을 입력하면 엔터키 입력 이벤트가 발생한다.
+    // 이 외에도 타입 API를 사용하면 Shift, Space, Alt 등의 키도 이런 식으로 작성할 수 있다.
+    await user.type(textInput, 'test{Enter}');
+
+    expect(spy).toHaveBeenCalledWith('test');
+  });
+
+  it('포커스가 활성화되면 onFocus prop으로 등록한 함수가 호출된다.', async () => {
+    // 포커스 활성화 방법
+    // 1. 탭 키로 인풋 요소로 포커스 이동
+    // 2. 인풋 요소를 클릭했을 때
+    // 3. textInput.focus()로 직접 발생
+
+    const spy = vi.fn();
+
+    // onFocusEventHandler를 호출할때는 별도의 인자를 넘기지 않는다. -> spy 함수의 호출 여부만 단원하면 된다.
+    const { user } = await render(<TextField onFocus={spy} />);
+
+    const textInput = screen.getByPlaceholderText('텍스트를 입력해 주세요.');
+
+    await user.click(textInput);
+
+    // spy 함수의 호출 여부만 단원하는 매체로 toHaveBeenCalled 매처를 사용()
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('포커스가 활성화되면 border 스타일이 추가된다.', async () => {
+    // 포커스를 활성화하기 위해서는 이전과 동일하게 텍스트 인풋 요소의 클릭 이벤트를 사용
+    // 단, 여기서는 input 요소에 border-style이 제대로 적용되는지 단언해야 한다.
+    const { user } = await render(<TextField />);
+
+    const textInput = screen.getByPlaceholderText('텍스트를 입력해 주세요.');
+
+    await user.click(textInput);
+
+    // DOM에서 CSS 클래스가 아닌 style 속성을 검증하기 위해서는 toHabeStyle 매처를 사용
+    expect(textInput).toHaveStyle({
+      borderWidth: 2,
+      borderColor: 'rgb(25, 118, 210)',
+    });
+  });
 });
