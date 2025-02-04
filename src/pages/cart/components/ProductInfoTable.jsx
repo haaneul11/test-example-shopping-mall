@@ -7,6 +7,7 @@ import { useUserStore } from '@/store/user';
 import { pick } from '@/utils/common';
 
 const ProductInfoTable = () => {
+  // 테스트 실행 전에 zustand 스토어의 state를 원하는 대로 변경 필요
   const { cart, removeCartItem, changeCartItemCount } = useCartStore(state =>
     pick(state, 'cart', 'removeCartItem', 'changeCartItemCount'),
   );
