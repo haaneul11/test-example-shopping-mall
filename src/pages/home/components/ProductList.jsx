@@ -19,6 +19,7 @@ const PRODUCT_PAGE_LIMIT = 20;
 // 각 카드의 구매, 장바구니 버튼을 눌렀을 때 이벤트 핸들러는 모두 정의된 상태이다.
 // 즉, 실제 앱에서 사용자와 상호작용할 로직들이 모두 정의되어 있다.
 
+// API 호출 -> 여러 컴포넌트가 조합된 영역에서 발생 -> 통합 테스트 검증 필요
 const ProductList = ({ limit = PRODUCT_PAGE_LIMIT }) => {
   const navigate = useNavigate();
   const filter = useFilterStore(state =>
